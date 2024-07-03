@@ -1,0 +1,8 @@
+streamlit
+yfinance
+pandas
+plotly
+llama-index
+python-dotenv
+streamlit-lottie
+requests

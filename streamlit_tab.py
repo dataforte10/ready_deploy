@@ -22,26 +22,38 @@ llm = Groq(model="llama3-70b-8192", api_key=GROOQ_API_KEY)
 def analyze_stock_data(technical_data, fundamental_data):
     # Create a prompt template for analysis
     template = (
-        "Answer in bahasa indonesia"
-        "Analyze the following stock data using both technical and fundamental analysis:\n"
-        "Technical Data (Open and Close prices):\n{technical_data}\n\n"
-        "Fundamental Data:\n{fundamental_data}\n\n"
-        "Provide insights on:\n"
-        "1. Overall trend\n"
-        "2. Key technical indicators\n"
-        "3. Important fundamental metrics\n"
-        "4. Potential strengths and weaknesses\n"
-        "5. Any notable patterns or anomalies"
+        "Anda bertindak sebagai Analis saham yang bertugas menganalisa data saham sesuai dengan data yang disajikan. "
+        "Tuliskan hasil analisa anda dalam bahasa indonesia yang sederhana.\n\n"
+        "Analisis data saham berikut menggunakan analisis teknikal dan fundamental:\n"
+        "Data Teknikal (Harga Buka dan Tutup):\n{technical_data}\n\n"
+        "Data Fundamental:\n{fundamental_data}\n\n"
+        "Berikan wawasan tentang:\n"
+        "1. Tren keseluruhan\n"
+        "2. Indikator teknikal utama\n"
+        "3. Metrik fundamental penting\n"
+        "4. Kekuatan dan kelemahan potensial\n"
+        "5. Pola atau anomali yang dapat diperhatikan\n"
+        "6. Rekomendasi posisi beli dan jual"
     )
     prompt = PromptTemplate(template)
 
     # Format the prompt with the data
     formatted_prompt = prompt.format(technical_data=technical_data, fundamental_data=fundamental_data)
-
+    
     # Get the analysis from Gemini
     response = llm.complete(formatted_prompt)
 
     return response
+
+def analyze_extra_prompt(extra_prompt,analysis):
+    template = (
+    "Sebagai seorang analis saham, berdasarkan data dari {analysis}, jawab pertanyaan yang diajukan oleh user ini: {extra_prompt}. Jawaban harus informatif dan tidak bertele-tele. Apabila Anda tidak memiliki jawabannya, bisa Anda tuliskan 'Saya tidak memiliki data yang cukup.'"
+    )
+    prompt = PromptTemplate(template)
+    formatted_prompt = prompt.format(analysis=analysis, extra_prompt=extra_prompt)
+    extra_prompt_response = llm.complete(formatted_prompt)
+    
+    return extra_prompt_response
 
 # Extract specific fundamental data
 def extract_specific_fundamental_data(details):
@@ -76,6 +88,7 @@ def load_lottie_url(url):
     if r.status_code != 200:
         return None
     return r.json()
+    
 
 # Streamlit Interface
 st.set_page_config(
@@ -85,19 +98,29 @@ st.set_page_config(
     menu_items ={
         'About': "# This is a header. This is an *extremely* cool app!"
         } )
-st.title("Stock Data Analyzer v1.1")
-tab1, tab2, tab3 = st.tabs(["Analyze", "Stock Data", "Financial Statement"])
+st.title("Kucing Orange Baik Hati")
+st.write("AI powered stock data analyzer")
+tab1, tab2, tab3, tab4 = st.tabs(["Analyze", "Stock Data", "Financial Statement","Major Shares"])
 
 # Sidebar for inputs
 with st.sidebar:
-    symbol = st.text_input("Enter stock symbol:", "AAPL")
+    symbol = st.text_input(
+        "Enter stock symbol:",
+        placeholder = "input stock symbol, ex: BBCA.JK (from indonesia exchange), ADBE",
+        ).upper()
     start_date = st.date_input("Start Date", value=pd.to_datetime("2024-01-01"))
     end_date = st.date_input("End Date", value=pd.Timestamp.now())
+    # Text area for additional questions or prompts
+    extra_prompt = st.text_area(
+    "Tulis hal yang ingin ditanyakan:",
+    placeholder="Anda bisa menuliskan hal yang mau ditanyakan berkaitan dengan saham yang ingin Anda analisa, misal 'Berapa titik support untuk saham'",
+    height=200
+    )
     analyze_button = st.button("Fetch and Analyze Data")
 
 if analyze_button:
     with tab1:
-    # Show loading animation
+        # Show loading animation
         with st.spinner('Fetching and analyzing data...'):
             # Fetch stock data
             stock_data = yf.download(symbol, start=start_date, end=end_date)
@@ -110,12 +133,18 @@ if analyze_button:
             fundamental_data_str = format_specific_fundamental_data(fundamental_data)
 
             # Fetch financial statements
-            income_stmt = ticker_data.income_stmt
-            quarterly_income_stmt = ticker_data.quarterly_income_stmt
+            income_stmt = ticker_data.financials
+            quarterly_income_stmt = ticker_data.quarterly_financials
             balance_sheet = ticker_data.balance_sheet
             quarterly_balance_sheet = ticker_data.quarterly_balance_sheet
             cashflow = ticker_data.cashflow
             quarterly_cashflow = ticker_data.quarterly_cashflow
+            try:
+                major_shares = ticker_data.major_holders
+                major_shares_available = True
+            except Exception as e:
+                major_shares = None
+                major_shares_available = False
 
             # Layout for results
             left_col, right_col = st.columns(2)
@@ -127,8 +156,14 @@ if analyze_button:
             st.markdown(f'<div class="stock-analysis">{analysis}</div>', unsafe_allow_html=True)
 
         with right_col:
+            # Display extra promp analysis
+            st.subheader("Hasil analisa jawaban untuk pertanyaan")
+            extra_prompt_analysis = analyze_extra_prompt(extra_prompt, analysis)
+            st.markdown(f'<div class="stock-analysis">{extra_prompt_analysis}</div>', unsafe_allow_html=True)
+
+
             # Display stock data as a candlestick chart
-            st.subheader("Stock Data Graph")
+            st.subheader(f"Stock Data Graph {symbol}")
             fig = go.Figure(data=[go.Candlestick(x=stock_data.index,
                                                 open=stock_data['Open'],
                                                 high=stock_data['High'],
@@ -139,7 +174,7 @@ if analyze_button:
             
         with tab2: 
             # Display stock data
-            st.subheader("Stock Data")
+            st.subheader(f"Stock Data {symbol}")
             st.dataframe(stock_data)
 
             # Display specific fundamental information
@@ -177,3 +212,20 @@ if analyze_button:
                 st.plotly_chart(fig)
             else:
                 st.write("Row 'Total Revenue' not found in the quarterly income statement.")
+
+        with tab4:
+            st.subheader("Major Shareholders")
+            if major_shares_available:
+                st.dataframe(major_shares)
+                insiders_percent = major_shares.loc[major_shares[0] == 'insidersPercentHeld', 'Value']
+                institutions_percent = major_shares.loc[major_shares[0] == 'institutionsPercentHeld', 'Value']
+                float_percent = major_shares.loc[major_shares[0] == 'institutionsFloatPercentHeld', 'Value']
+
+                labels = ['Insiders', 'Institutions', 'Float']
+                values = [insiders_percent, institutions_percent, float_percent]
+
+                fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.3)])
+                fig.update_layout(title=f"{symbol} Major Shareholders")
+                st.plotly_chart(fig)
+            else:
+                st.write("Major shareholders' data is not available.")
