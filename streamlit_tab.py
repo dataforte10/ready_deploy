@@ -142,6 +142,11 @@ if analyze_button:
             quarterly_balance_sheet = ticker_data.quarterly_balance_sheet
             cashflow = ticker_data.cashflow
             quarterly_cashflow = ticker_data.quarterly_cashflow
+
+            # Fetch other information
+            recommendations = ticker_data.recommendations
+            recommendations_summary = ticker_data.recommendations_summary
+            recommendations_upgrade = ticker_data.upgrades_downgrades
             try:
                 major_shares = ticker_data.major_holders
                 major_shares_available = True
