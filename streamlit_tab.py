@@ -23,17 +23,19 @@ def analyze_stock_data(technical_data, fundamental_data):
     # Create a prompt template for analysis
     template = (
         "Anda bertindak sebagai Analis saham yang bertugas menganalisa data saham sesuai dengan data yang disajikan. "
-        "Tuliskan hasil analisa anda dalam bahasa indonesia yang sederhana.\n\n"
+        "Tuliskan hasil analisa anda dalam bahasa indonesia yang sederhana. pastikan anda menggunakan mata uang yang sesuai dengan negara yang asal saham tersebut. Anda bisa melihat dari informasi Currency\n\n"
         "Analisis data saham berikut menggunakan analisis teknikal dan fundamental:\n"
         "Data Teknikal (Harga Buka dan Tutup):\n{technical_data}\n\n"
         "Data Fundamental:\n{fundamental_data}\n\n"
         "Berikan wawasan tentang:\n"
-        "1. Tren keseluruhan\n"
-        "2. Indikator teknikal utama\n"
-        "3. Metrik fundamental penting\n"
-        "4. Kekuatan dan kelemahan potensial\n"
-        "5. Pola atau anomali yang dapat diperhatikan\n"
-        "6. Rekomendasi posisi beli dan jual"
+        "1. Tren keseluruhan, tuliskan dengan menyertakan data, angka, Jelaskan dengan narasi yang informatif\n"
+        "2. Indikator teknikal utama,tuliskan dengan menyertakan data, angka, Jelaskan dengan narasi yang informatif\n"
+        "3. Metrik fundamental penting,tuliskan dengan menyertakan data, angka, Jelaskan dengan narasi yang informatif\n"
+        "4. Kekuatan dan kelemahan potensial,tuliskan dengan menyertakan data, angka, Jelaskan dengan narasi yang informatif\n"
+        "5. Pola atau anomali yang dapat diperhatikan,tuliskan dengan menyertakan data, angka, Jelaskan dengan narasi yang informatif\n"
+        "6. Rekomendasi posisi beli dan jual contoh format penulisan\n"
+        "Rekomendasi Beli: Saham ini dapat dibeli jika harga saham turun ke level support sekitar 9.500, dengan target harga sekitar 10.500.\n"
+        "Rekomendasi Jual: Saham ini dapat dijual jika harga saham mencapai level resistance sekitar 10.500, dengan target harga sekitar 9.500."
     )
     prompt = PromptTemplate(template)
 
@@ -96,9 +98,10 @@ st.set_page_config(
     layout="wide", 
     page_icon=":office:",
     menu_items ={
-        'About': "# This is a header. This is an *extremely* cool app!"
+        'About': "Apps ini dibuat dengan bantuan dari AI. Menggunakan groq dan sumber dari Y Finance\n" 
+        "mau buat yang sama juga, bisa chat saya ya"
         } )
-st.title("Kucing Orange Baik Hati")
+st.title("Kucing Abu abu Baik Hati")
 st.write("AI powered stock data analyzer")
 tab1, tab2, tab3, tab4 = st.tabs(["Analyze", "Stock Data", "Financial Statement","Major Shares"])
 
