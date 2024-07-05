@@ -165,24 +165,6 @@ if analyze_button:
 
         with right_col:
 
-            # Display extra promp analysis
-            st.subheader("Hasil analisa jawaban untuk pertanyaan")
-            extra_prompt_analysis = analyze_extra_prompt(extra_prompt, analysis)
-            st.markdown(f'<div class="stock-analysis">{extra_prompt_analysis}</div>', unsafe_allow_html=True)
-
-            
-           # Display stock data as a candlestick chart
-            st.subheader(f"Stock Data Graph {symbol}")
-            fig = go.Figure(data=[go.Candlestick(x=stock_data.index,
-                                                open=stock_data['Open'],
-                                                high=stock_data['High'],
-                                                low=stock_data['Low'],
-                                                close=stock_data['Close'])])
-            fig.update_layout(title=f"{symbol} Stock Candlestick Chart", xaxis_title="Date", yaxis_title="Price (IDR)")
-            st.plotly_chart(fig) 
-            
-
-
             # Display stock data as a candlestick chart
             st.subheader(f"Stock Data Graph {symbol}")
             fig = go.Figure(data=[go.Candlestick(x=stock_data.index,
@@ -191,8 +173,14 @@ if analyze_button:
                                                 low=stock_data['Low'],
                                                 close=stock_data['Close'])])
             fig.update_layout(title=f"{symbol} Stock Candlestick Chart", xaxis_title="Date", yaxis_title="Price (IDR)")
-            st.plotly_chart(fig)
-            
+            st.plotly_chart(fig) 
+
+            # Display extra promp analysis
+            st.subheader("Hasil analisa jawaban untuk pertanyaan")
+            extra_prompt_analysis = analyze_extra_prompt(extra_prompt, analysis)
+            st.markdown(f'<div class="stock-analysis">{extra_prompt_analysis}</div>', unsafe_allow_html=True)        
+           
+                                   
         with tab2: 
             # Display stock data
             st.subheader(f"Stock Data {symbol}")
