@@ -175,6 +175,10 @@ if analyze_button:
             fig.update_layout(title=f"{symbol} Stock Candlestick Chart", xaxis_title="Date", yaxis_title="Price (IDR)")
             st.plotly_chart(fig) 
 
+            # Display specific fundamental information
+            st.subheader("Stock Information")
+            st.markdown(fundamental_data_str) 
+
             # Display extra promp analysis
             st.subheader("Hasil analisa jawaban untuk pertanyaan")
             extra_prompt_analysis = analyze_extra_prompt(extra_prompt, analysis)
@@ -184,11 +188,7 @@ if analyze_button:
         with tab2: 
             # Display stock data
             st.subheader(f"Stock Data {symbol}")
-            st.dataframe(stock_data, width=1000)    
-
-            # Display specific fundamental information
-            st.subheader("Stock Information")
-            st.markdown(fundamental_data_str)        
+            st.dataframe(stock_data, width=1000)                       
 
             # Display financial metrics using st.metric
             st.subheader("Financial Statements")
@@ -222,19 +222,4 @@ if analyze_button:
             else:
                 st.write("Row 'Total Revenue' not found in the quarterly income statement.")
 
-        with tab4:
-            st.subheader("Major Shareholders")
-            if major_shares_available:
-                st.dataframe(major_shares)
-                insiders_percent = major_shares.loc[major_shares[0] == 'insidersPercentHeld', 'Value']
-                institutions_percent = major_shares.loc[major_shares[0] == 'institutionsPercentHeld', 'Value']
-                float_percent = major_shares.loc[major_shares[0] == 'institutionsFloatPercentHeld', 'Value']
-
-                labels = ['Insiders', 'Institutions', 'Float']
-                values = [insiders_percent, institutions_percent, float_percent]
-
-                fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.3)])
-                fig.update_layout(title=f"{symbol} Major Shareholders")
-                st.plotly_chart(fig)
-            else:
-                st.write("Major shareholders' data is not available.")
+        
