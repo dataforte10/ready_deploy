@@ -7,3 +7,4 @@ python-dotenv
 streamlit-lottie
 requests
 llama_index.llms.groq
+duckduckgo-search
